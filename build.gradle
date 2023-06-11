@@ -1,0 +1,62 @@
+plugins {
+	id 'java'
+	id 'war'
+	id 'org.springframework.boot' version '3.1.0'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.contact.management'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+buildscript {
+	repositories {
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+	dependencies {
+		classpath "org.openapitools:openapi-generator-gradle-plugin:4.3.1"
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    classpath "org.openapitools:openapi-generator-gradle-plugin:6.6.0"
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+   //implementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
+   
+  
+	
+}
+ task generateSampleClient(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+	generatorName = "java"
+	inputSpec = "$rootDir/api-gen/api-spec.yml".toString()
+	outputDir = "$rootDir/api-client-generated".toString()
+	apiPackage = "com.contact.management.ConatctManagement.api"
+	invokerPackage = "com.contact.management.ConatctManagement.invoker"
+	modelPackage = "com.contact.management.ConatctManagement.model"
+	configOptions = [
+			dateLibrary: "java8"
+	]
+	groupId = 'com.contact.management.ConatctManagement'
+	id = 'sample-client'
+	skipValidateSpec = true
+	logToStderr = true
+	generateAliasAsModel = false
+	enablePostProcessFile = false
+}
+
+task publishSampleClientToMavenLocal(type: Exec, dependsOn: generateSampleClient) {
+	commandLine './api-gen/publish_client_to_maven_local.sh'
+}
+tasks.named('test') {
+	useJUnitPlatform()
+}
